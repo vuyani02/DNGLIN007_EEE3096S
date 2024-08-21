@@ -36,7 +36,7 @@
 // TODO: Add values for below variables
 #define NS 128        // Number of samples in LUT
 #define TIM2CLK  8000000 // STM Clock frequency
-#define F_SIGNAL 1000 // Frequency of output analog signal
+#define F_SIGNAL 88 // Frequency of output analog signal
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,8 +57,9 @@ uint32_t saw_LUT[NS] = {0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 1
 uint32_t triangle_LUT[NS] = {0, 16, 32, 48, 64, 81, 97, 113, 129, 146, 162, 178, 194, 211, 227, 243, 259, 276, 292, 308, 324, 341, 357, 373, 389, 405, 422, 438, 454, 470, 487, 503, 519, 535, 552, 568, 584, 600, 617, 633, 649, 665, 682, 698, 714, 730, 746, 763, 779, 795, 811, 828, 844, 860, 876, 893, 909, 925, 941, 958, 974, 990, 1006, 1023, 1023, 1006, 990, 974, 958, 941, 925, 909, 893, 876, 860, 844, 828, 811, 795, 779, 763, 746, 730, 714, 698, 682, 665, 649, 633, 617, 600, 584, 568, 552, 535, 519, 503, 487, 470, 454, 438, 422, 405, 389, 373, 357, 341, 324, 308, 292, 276, 259, 243, 227, 211, 194, 178, 162, 146, 129, 113, 97, 81, 64, 48, 32, 16, 0};
 
 // TODO: Equation to calculate TIM2_Ticks
+//tim2_ticks =TIM2CLK /(NS * F_SIGNAL)
 
-uint32_t TIM2_Ticks = 0; // How often to write new LUT value
+uint32_t TIM2_Ticks = TIM2CLK /(NS * F_SIGNAL); // How often to write new LUT value
 uint32_t DestAddress = (uint32_t) &(TIM3->CCR3); // Write LUT TO TIM3->CCR3 to modify PWM duty cycle
 /* USER CODE END PV */
 
@@ -91,6 +92,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  init_LCD();
 
   /* USER CODE BEGIN Init */
   /* USER CODE END Init */
@@ -109,18 +111,25 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // TODO: Start TIM3 in PWM mode on channel 3
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
 
   // TODO: Start TIM2 in Output Compare (OC) mode on channel 1.
+  HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1);
 
 
   // TODO: Start DMA in IT mode on TIM2->CH1; Source is LUT and Dest is TIM3->CCR3; start with Sine LUT
+  HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)Sin_LUT, (uint32_t)&(TIM3->CCR3), NS);// start DMA
 
 
   // TODO: Write current waveform to LCD ("Sine")
+  lcd_command(CLEAR);        // Set cursor to the start position (first row, first column)
+  lcd_putstring("Waveform: Sine");  // Print "Waveform: Sine" on the LCD
+
   //delay(3000);
 
   // TODO: Enable DMA (start transfer from LUT to CCR)
+  __HAL_TIM_ENABLE_DMA(&htim2, TIM_DMA_CC1); // enable the DMA
 
 
   /* USER CODE END 2 */
@@ -346,13 +355,65 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void EXTI0_1_IRQHandler(void)
 {
+//	uint8_t current_waveform = 0,prev_interrupt_time =0,current_interrupt_time=HAL_GetTick();
+
+    static uint32_t prev_interrupt_time = 0;
+    static uint8_t current_waveform = 0;
+    uint32_t current_interrupt_time = HAL_GetTick();
+
 	// TODO: Debounce using HAL_GetTick()
+    if (current_interrupt_time -prev_interrupt_time >= 150)
+    {
+    	// TODO: Disable DMA transfer and abort IT, then start DMA in IT mode with new LUT and re-enable transfer
+    	// HINT: Consider using C's "switch" function to handle LUT changes
+
+    	prev_interrupt_time = current_interrupt_time;
 
 
-	// TODO: Disable DMA transfer and abort IT, then start DMA in IT mode with new LUT and re-enable transfer
-	// HINT: Consider using C's "switch" function to handle LUT changes
+        HAL_DMA_Abort(&hdma_tim2_ch1);// Disable DMA transfer
 
 
+
+        switch (current_waveform)
+        {
+            case 0:
+            	current_waveform = 1; // Set to next waveform
+                HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)Sin_LUT, (uint32_t)&(TIM3->CCR3), NS);
+                break;
+            case 1:
+            	current_waveform = 2; // Set to next waveform
+                HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)saw_LUT, (uint32_t)&(TIM3->CCR3), NS);
+                break;
+            case 2:
+            	current_waveform = 0; // Set to first waveform
+                HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)triangle_LUT, (uint32_t)&(TIM3->CCR3), NS);
+                break;
+        }
+
+
+
+
+        // Enable DMA transfer
+        __HAL_TIM_ENABLE_DMA(&htim2, TIM_DMA_CC1);
+
+        switch (current_waveform) // Write new waveform to LCD
+        {
+            case 0:
+                lcd_command(CLEAR);
+                lcd_putstring("Waveform: Sine");
+                break;
+            case 1:
+                lcd_command(CLEAR);
+                lcd_putstring("Waveform: Sawtooth");
+                break;
+            case 2:
+                lcd_command(CLEAR);
+                lcd_putstring("Waveform: Triangle");
+                break;
+        }
+
+
+    }
 
 	HAL_GPIO_EXTI_IRQHandler(Button0_Pin); // Clear interrupt flags
 }
