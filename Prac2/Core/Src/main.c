@@ -36,7 +36,7 @@
 // TODO: Add values for below variables
 #define NS 128        // Number of samples in LUT
 #define TIM2CLK  8000000 // STM Clock frequency
-#define F_SIGNAL 88 // Frequency of output analog signal
+#define F_SIGNAL 1000// Frequency of output analog signal
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,10 +52,9 @@ DMA_HandleTypeDef hdma_tim2_ch1;
 /* USER CODE BEGIN PV */
 // TODO: Add code for global variables, including LUTs
 
-uint32_t Sin_LUT[NS] = {511, 536, 561, 586, 611, 635, 659, 683, 707, 730, 752, 774, 795, 816, 835, 855, 873, 890, 906, 922, 936, 950, 962, 973, 984, 993, 1000, 1007, 1013, 1017, 1020, 1022, 1023, 1022, 1020, 1017, 1013, 1007, 1000, 993, 984, 973, 962, 950, 936, 922, 906, 890, 873, 855, 835, 816, 795, 774, 752, 730, 707, 683, 659, 635, 611, 586, 561, 536, 511, 486, 461, 436, 411, 387, 363, 339, 315, 292, 270, 248, 227, 206, 187, 167, 149, 132, 116, 100, 86, 72, 60, 49, 38, 29, 22, 15, 9, 5, 2, 0, 0, 0, 2, 5, 9, 15, 22, 29, 38, 49, 60, 72, 86, 100, 116, 132, 149, 167, 187, 206, 227, 248, 270, 292, 315, 339, 363, 387, 411, 436, 461, 486};
 uint32_t saw_LUT[NS] = {0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 153, 161, 169, 177, 185, 193, 201, 209, 217, 225, 233, 241, 249, 257, 265, 273, 281, 289, 298, 306, 314, 322, 330, 338, 346, 354, 362, 370, 378, 386, 394, 402, 410, 418, 426, 434, 443, 451, 459, 467, 475, 483, 491, 499, 507, 515, 523, 531, 539, 547, 555, 563, 571, 579, 588, 596, 604, 612, 620, 628, 636, 644, 652, 660, 668, 676, 684, 692, 700, 708, 716, 724, 733, 741, 749, 757, 765, 773, 781, 789, 797, 805, 813, 821, 829, 837, 845, 853, 861, 869, 878, 886, 894, 902, 910, 918, 926, 934, 942, 950, 958, 966, 974, 982, 990, 998, 1006, 1014, 1023};
-uint32_t triangle_LUT[NS] = {0, 16, 32, 48, 64, 81, 97, 113, 129, 146, 162, 178, 194, 211, 227, 243, 259, 276, 292, 308, 324, 341, 357, 373, 389, 405, 422, 438, 454, 470, 487, 503, 519, 535, 552, 568, 584, 600, 617, 633, 649, 665, 682, 698, 714, 730, 746, 763, 779, 795, 811, 828, 844, 860, 876, 893, 909, 925, 941, 958, 974, 990, 1006, 1023, 1023, 1006, 990, 974, 958, 941, 925, 909, 893, 876, 860, 844, 828, 811, 795, 779, 763, 746, 730, 714, 698, 682, 665, 649, 633, 617, 600, 584, 568, 552, 535, 519, 503, 487, 470, 454, 438, 422, 405, 389, 373, 357, 341, 324, 308, 292, 276, 259, 243, 227, 211, 194, 178, 162, 146, 129, 113, 97, 81, 64, 48, 32, 16, 0};
-
+uint32_t Sin_LUT[NS] = {511, 536, 561, 586, 611, 635, 659, 683, 707, 730, 752, 774, 795, 816, 835, 855, 873, 890, 906, 922, 936, 950, 962, 973, 984, 993, 1000, 1007, 1013, 1017, 1020, 1022, 1023, 1022, 1020, 1017, 1013, 1007, 1000, 993, 984, 973, 962, 950, 936, 922, 906, 890, 873, 855, 835, 816, 795, 774, 752, 730, 707, 683, 659, 635, 611, 586, 561, 536, 511, 486, 461, 436, 411, 387, 363, 339, 315, 292, 270, 248, 227, 206, 187, 167, 149, 132, 116, 100, 86, 72, 60, 49, 38, 29, 22, 15, 9, 5, 2, 0, 0, 0, 2, 5, 9, 15, 22, 29, 38, 49, 60, 72, 86, 100, 116, 132, 149, 167, 187, 206, 227, 248, 270, 292, 315, 339, 363, 387, 411, 436, 461, 486};
+uint32_t triangle_LUT[NS]= {0, 16, 32, 48, 64, 81, 97, 113, 129, 146, 162, 178, 194, 211, 227, 243, 259, 276, 292, 308, 324, 341, 357, 373, 389, 405, 422, 438, 454, 470, 487, 503, 519, 535, 552, 568, 584, 600, 617, 633, 649, 665, 682, 698, 714, 730, 746, 763, 779, 795, 811, 828, 844, 860, 876, 893, 909, 925, 941, 958, 974, 990, 1006, 1023, 1023, 1006, 990, 974, 958, 941, 925, 909, 893, 876, 860, 844, 828, 811, 795, 779, 763, 746, 730, 714, 698, 682, 665, 649, 633, 617, 600, 584, 568, 552, 535, 519, 503, 487, 470, 454, 438, 422, 405, 389, 373, 357, 341, 324, 308, 292, 276, 259, 243, 227, 211, 194, 178, 162, 146, 129, 113, 97, 81, 64, 48, 32, 16, 0};
 // TODO: Equation to calculate TIM2_Ticks
 //tim2_ticks =TIM2CLK /(NS * F_SIGNAL)
 
@@ -124,7 +123,7 @@ int main(void)
 
   // TODO: Write current waveform to LCD ("Sine")
   lcd_command(CLEAR);        // Set cursor to the start position (first row, first column)
-  lcd_putstring("Waveform: Sine");  // Print "Waveform: Sine" on the LCD
+  lcd_putstring("Sine");  // Print "Waveform: Sine" on the LCD
 
   //delay(3000);
 
@@ -369,24 +368,26 @@ void EXTI0_1_IRQHandler(void)
 
     	prev_interrupt_time = current_interrupt_time;
 
+        __HAL_DMA_DISABLE(&hdma_tim2_ch1); // Disable DMA transfer
 
-        HAL_DMA_Abort(&hdma_tim2_ch1);// Disable DMA transfer
+        HAL_DMA_Abort(&hdma_tim2_ch1);
 
 
 
         switch (current_waveform)
         {
+
             case 0:
-            	current_waveform = 1; // Set to next waveform
-                HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)Sin_LUT, (uint32_t)&(TIM3->CCR3), NS);
-                break;
-            case 1:
-            	current_waveform = 2; // Set to next waveform
+            	//current_waveform = 1; // Set to next waveform
                 HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)saw_LUT, (uint32_t)&(TIM3->CCR3), NS);
                 break;
-            case 2:
-            	current_waveform = 0; // Set to first waveform
+            case 1:
+            	//current_waveform = 2; // Set to first waveform
                 HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)triangle_LUT, (uint32_t)&(TIM3->CCR3), NS);
+                break;
+            case 2:
+                //current_waveform = 0; // Set to next waveform
+                HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)Sin_LUT, (uint32_t)&(TIM3->CCR3), NS);
                 break;
         }
 
@@ -400,16 +401,19 @@ void EXTI0_1_IRQHandler(void)
         {
             case 0:
                 lcd_command(CLEAR);
-                lcd_putstring("Waveform: Sine");
+                lcd_putstring("Sawtooth ");
+                current_waveform = 1;
                 break;
             case 1:
                 lcd_command(CLEAR);
-                lcd_putstring("Waveform: Sawtooth");
+                lcd_putstring("Triangle");
+                current_waveform = 2;
                 break;
             case 2:
-                lcd_command(CLEAR);
-                lcd_putstring("Waveform: Triangle");
-                break;
+                   lcd_command(CLEAR);
+                   lcd_putstring("Sine");
+                   current_waveform = 0;
+                   break;
         }
 
 
